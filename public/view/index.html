@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat WebSocket - MVC</title>
+    <link rel="stylesheet" href="/view/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>💬 Chat WebSocket</h1>
+            <div class="status" id="status">Desconectado</div>
+        </div>
+
+        <div id="login-screen">
+            <h2>Bem-vindo!</h2>
+            <input 
+                type="text" 
+                id="username-input" 
+                placeholder="Digite seu nome de usuário"
+                maxlength="20"
+            >
+            <button id="join-button">Entrar no Chat</button>
+        </div>
+
+        <div id="chat-screen">
+            <div id="messages"></div>
+            <div class="typing-indicator" id="typing-indicator"></div>
+            <div class="input-area">
+                <div class="input-container">
+                    <input 
+                        type="text" 
+                        id="message-input" 
+                        placeholder="Digite sua mensagem..."
+                        maxlength="500"
+                    >
+                    <button id="send-button">Enviar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="/view/js/index.js"></script>
+</body>
+</html>
