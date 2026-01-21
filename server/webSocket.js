@@ -3,6 +3,9 @@ function setupWebSocket(wss, chatController, broadcast, server) {
   // Gerenciar conexões WebSocket
   wss.on('connection', (ws) => {
     console.log('Novo cliente conectado');
+    setInterval(() => {
+      chatController.clearOldMessages();
+    }, 60000);
 
     ws.on('message', (data) => {
       try {

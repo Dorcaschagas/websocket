@@ -233,3 +233,121 @@ body {
     cursor: not-allowed;
     transform: none;
 }
+
+.clear-warning {
+    background: #fff3cd;
+    color: #856404;
+    padding: 10px;
+    text-align: center;
+    font-size: 13px;
+    border-bottom: 1px solid #ffeaa7;
+    font-weight: 500;
+}
+
+/* Responsivo para telefone */
+@media (max-width: 768px) {
+    body {
+        padding: 0;
+    }
+
+    .container {
+        width: 100%;
+        height: 100vh;
+        border-radius: 0;
+        max-width: none;
+    }
+
+    .header h1 {
+        font-size: 20px;
+    }
+
+    .status {
+        font-size: 12px;
+    }
+
+    #login-screen {
+        padding: 20px;
+    }
+
+    #login-screen h2 {
+        font-size: 24px;
+        margin-bottom: 20px;
+    }
+
+    #username-input,
+    #join-button {
+        max-width: 100%;
+    }
+
+    #messages {
+        padding: 15px;
+    }
+
+    .message-text {
+        max-width: 85%;
+        font-size: 14px;
+    }
+
+    .input-area {
+        padding: 15px;
+    }
+
+    .input-container {
+        flex-direction: row;
+        gap: 8px;
+    }
+
+    #message-input {
+        padding: 12px;
+        font-size: 14px;
+    }
+
+    #send-button {
+        padding: 12px 20px;
+        font-size: 14px;
+        white-space: nowrap;
+    }
+
+    .clear-warning {
+        font-size: 11px;
+        padding: 8px;
+    }
+}
+
+@media (max-width: 480px) {
+    .header {
+        padding: 15px;
+    }
+
+    .header h1 {
+        font-size: 18px;
+    }
+
+    #messages {
+        padding: 10px;
+    }
+
+    .message {
+        margin-bottom: 10px;
+    }
+
+    .message-text {
+        max-width: 90%;
+        padding: 8px 12px;
+        font-size: 13px;
+    }
+
+    .input-area {
+        padding: 10px;
+    }
+
+    #message-input {
+        padding: 10px;
+        font-size: 13px;
+    }
+
+    #send-button {
+        padding: 10px 15px;
+        font-size: 13px;
+    }
+}

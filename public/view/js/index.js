@@ -15,7 +15,7 @@ const typingIndicator = document.getElementById('typing-indicator');
 // Conectar ao WebSocket
 function connect() {
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const wsUrl = `${protocol}//${window.location.host}:${3015}`;
+    const wsUrl = `${protocol}//${window.location.host}`;
     console.log('Conectando ao WebSocket em', wsUrl);
 
     ws = new WebSocket(wsUrl);

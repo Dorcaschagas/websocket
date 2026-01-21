@@ -51,6 +51,20 @@ class ChatController {
   generateUserId() {
     return `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   }
+
+  clearOldMessages() {
+    const oneMinuteAgo = new Date(Date.now() - 60000);
+    const initialLength = this.messages.length;
+    
+    this.messages = this.messages.filter(message => 
+      new Date(message.timestamp) > oneMinuteAgo
+    );
+    
+    const clearedCount = initialLength - this.messages.length;
+    if (clearedCount > 0) {
+      console.log(`${clearedCount} mensagens antigas foram removidas`);
+    }
+  }
 }
 
 module.exports = ChatController;
