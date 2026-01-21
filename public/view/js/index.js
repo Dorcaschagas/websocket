@@ -70,6 +70,7 @@ function handleMessage(data) {
     switch (data.type) {
         case 'history':
             data.messages.forEach(msg => addMessage(msg));
+            scrollToBottom(true); // Forçar scroll ao carregar histórico
             break;
 
         case 'message':
@@ -118,7 +119,7 @@ function addMessage(message) {
     `;
 
     messagesDiv.appendChild(messageDiv);
-    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    scrollToBottom();
 }
 
 // Adicionar mensagem do sistema
@@ -127,7 +128,20 @@ function addSystemMessage(text) {
     messageDiv.className = 'system-message';
     messageDiv.textContent = text;
     messagesDiv.appendChild(messageDiv);
-    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    scrollToBottom();
+}
+
+// Scroll inteligente para o final
+function scrollToBottom(force = false) {
+    // Verificar se o usuário está perto do final (dentro de 100px)
+    const isNearBottom = messagesDiv.scrollHeight - messagesDiv.scrollTop - messagesDiv.clientHeight < 100;
+    
+    // Rolar apenas se estiver perto do final ou se for forçado
+    if (isNearBottom || force) {
+        setTimeout(() => {
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }, 0);
+    }
 }
 
 // Mostrar indicador de digitação
