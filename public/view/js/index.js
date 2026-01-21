@@ -263,6 +263,31 @@ messageInput.addEventListener('input', () => {
 //     localStorage.removeItem('chatUsername');
 // }
 
+// Reconectar quando a página voltar a ficar ativa
+document.addEventListener('visibilitychange', () => {
+    if (!document.hidden && username) {
+        // Página voltou a ficar visível
+        if (!ws || ws.readyState === WebSocket.CLOSED || ws.readyState === WebSocket.CLOSING) {
+            console.log('Tela reativada - reconectando...');
+            statusDiv.textContent = 'Reconectando...';
+            reconnectAttempts = 0; // Resetar tentativas
+            connect();
+        }
+    }
+});
+
+// Reconectar quando a janela receber foco
+window.addEventListener('focus', () => {
+    if (username) {
+        if (!ws || ws.readyState === WebSocket.CLOSED || ws.readyState === WebSocket.CLOSING) {
+            console.log('Janela focada - reconectando...');
+            statusDiv.textContent = 'Reconectando...';
+            reconnectAttempts = 0; // Resetar tentativas
+            connect();
+        }
+    }
+});
+
 // Fechar conexão ao sair da página
 window.addEventListener('beforeunload', () => {
     if (ws) {
