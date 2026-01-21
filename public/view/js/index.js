@@ -142,9 +142,18 @@ function scrollToBottom(force = false) {
 // Mostrar indicador de digitação
 function showTyping(username, isTyping) {
     if (isTyping) {
-        typingIndicator.textContent = `${username} está digitando...`;
+        typingIndicator.className = 'typing-indicator active';
+        typingIndicator.innerHTML = `
+            ${username} está digitando
+            <span class="typing-dots">
+                <span></span>
+                <span></span>
+                <span></span>
+            </span>
+        `;
     } else {
-        typingIndicator.textContent = '';
+        typingIndicator.className = 'typing-indicator';
+        typingIndicator.innerHTML = '';
     }
 }
 
