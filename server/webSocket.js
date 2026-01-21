@@ -1,18 +1,17 @@
-
 function setupWebSocket(wss, chatController, broadcast, server) {
   // Gerenciar conexões WebSocket
   wss.on('connection', (ws) => {
     console.log('Novo cliente conectado');
-    
+
     const clearMessagesInterval = setInterval(() => {
-      const result = chatController.clearOldMessages();
-      if (result.cleared) {
-        // Notificar todos os clientes sobre a limpeza
+      const results = chatController.clearOldMessages();
+      results.forEach(result => {
+        // Notificar clientes do grupo sobre a limpeza
         broadcast({
           type: 'messagesCleared',
           remainingTimestamps: result.remainingTimestamps
-        });
-      }
+        }, null, result.groupId);
+      });
     }, 60000);
 
     ws.on('message', (data) => {
@@ -21,53 +20,103 @@ function setupWebSocket(wss, chatController, broadcast, server) {
 
         switch (messageData.type) {
           case 'join':
-            // Adicionar usuário
-            const user = chatController.addUser(ws, messageData.username);
-            
-            // Enviar mensagens recentes para o novo usuário
+            // Adicionar usuário ao grupo (padrão: geral)
+            const user = chatController.addUser(ws, messageData.username, messageData.groupId || 'geral');
+            const userData = chatController.getUserData(ws);
+
+            // Enviar lista de grupos
             ws.send(JSON.stringify({
-              type: 'history',
-              messages: chatController.getRecentMessages()
+              type: 'groupList',
+              groups: chatController.getAllGroups()
             }));
 
-            // Notificar todos sobre novo usuário
+            // Enviar mensagens recentes do grupo
+            ws.send(JSON.stringify({
+              type: 'history',
+              messages: chatController.getRecentMessages(userData.groupId),
+              groupId: userData.groupId
+            }));
+
+            // Notificar todos do grupo sobre novo usuário
             broadcast({
               type: 'userJoined',
               user: user.toJSON(),
-              userCount: chatController.getUserCount()
-            });
+              userCount: chatController.getUserCount(userData.groupId),
+              groupId: userData.groupId
+            }, null, userData.groupId);
 
-            // Enviar lista de usuários para o novo cliente
-            ws.send(JSON.stringify({
-              type: 'userList',
-              users: chatController.getUserList()
-            }));
+            // Atualizar contadores de todos os grupos
+            broadcast({
+              type: 'groupList',
+              groups: chatController.getAllGroups()
+            });
             break;
 
-          case 'message':
-            const currentUser = chatController.getUser(ws);
-            if (currentUser) {
-              const message = chatController.addMessage(
-                currentUser.username,
-                messageData.text
-              );
+          case 'switchGroup':
+            const switchResult = chatController.switchGroup(ws, messageData.groupId);
 
-              // Broadcast da mensagem para todos
+            if (switchResult) {
+              // Notificar grupo antigo
+              if (switchResult.oldGroup) {
+                broadcast({
+                  type: 'userLeft',
+                  username: switchResult.user.username,
+                  userCount: chatController.getUserCount(switchResult.oldGroup.id),
+                  groupId: switchResult.oldGroup.id
+                }, null, switchResult.oldGroup.id);
+              }
+
+              // Enviar histórico do novo grupo
+              ws.send(JSON.stringify({
+                type: 'history',
+                messages: chatController.getRecentMessages(messageData.groupId),
+                groupId: messageData.groupId
+              }));
+
+              // Notificar novo grupo
               broadcast({
-                type: 'message',
-                message: message.toJSON()
-              }, null); // Enviar para todos, incluindo o remetente
+                type: 'userJoined',
+                user: switchResult.user.toJSON(),
+                userCount: chatController.getUserCount(messageData.groupId),
+                groupId: messageData.groupId
+              }, null, messageData.groupId);
+
+              // Confirmar mudança para o usuário
+              ws.send(JSON.stringify({
+                type: 'groupSwitched',
+                groupId: messageData.groupId,
+                group: switchResult.newGroup
+              }));
+
+              // Atualizar contadores
+              broadcast({
+                type: 'groupList',
+                groups: chatController.getAllGroups()
+              });
             }
             break;
 
+          case 'message':
+              const result = chatController.addMessage(ws, messageData.text);
+              
+              if (result) {
+                  // Broadcast apenas para o grupo COM groupId
+                  broadcast({
+                      type: 'message',
+                      message: result.message.toJSON(),
+                      groupId: result.groupId 
+                  }, null, result.groupId);
+              }
+              break;
+
           case 'typing':
-            const typingUser = chatController.getUser(ws);
-            if (typingUser) {
+            const typingUserData = chatController.getUserData(ws);
+            if (typingUserData) {
               broadcast({
                 type: 'typing',
-                username: typingUser.username,
+                username: typingUserData.user.username,
                 isTyping: messageData.isTyping
-              }, ws); // Não enviar para o próprio usuário
+              }, ws, typingUserData.groupId); // Não enviar para o próprio usuário
             }
             break;
         }
@@ -78,14 +127,23 @@ function setupWebSocket(wss, chatController, broadcast, server) {
 
     ws.on('close', () => {
       clearInterval(clearMessagesInterval);
-      const user = chatController.removeUser(ws);
-      if (user) {
-        console.log(`Cliente desconectado: ${user.username}`);
-        
+      const removed = chatController.removeUser(ws);
+
+      if (removed) {
+        console.log(`Cliente desconectado: ${removed.user.username}`);
+
+        // Notificar grupo
         broadcast({
           type: 'userLeft',
-          username: user.username,
-          userCount: chatController.getUserCount()
+          username: removed.user.username,
+          userCount: chatController.getUserCount(removed.groupId),
+          groupId: removed.groupId
+        }, null, removed.groupId);
+
+        // Atualizar contadores
+        broadcast({
+          type: 'groupList',
+          groups: chatController.getAllGroups()
         });
       }
     });
@@ -105,4 +163,4 @@ function setupWebSocket(wss, chatController, broadcast, server) {
   });
 }
 
-module.exports = setupWebSocket; 
+module.exports = setupWebSocket;

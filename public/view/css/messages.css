@@ -1,0 +1,380 @@
+
+/* Área de mensagens e input */
+#messages {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 20px;
+    background: #f5f5f5;
+    scroll-behavior: smooth;
+    display: flex;
+    flex-direction: column;
+}
+
+#messages::-webkit-scrollbar {
+    width: 8px;
+}
+
+#messages::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+#messages::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+
+#messages::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+.message {
+    margin-bottom: 15px;
+    animation: fadeIn 0.3s;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.message.own {
+    align-items: flex-end;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.message-info {
+    font-size: 12px;
+    color: #666;
+    margin-bottom: 5px;
+}
+
+.message.own .message-info {
+    text-align: right;
+}
+
+.message-username {
+    font-weight: bold;
+    color: #667eea;
+}
+
+.message.own .message-username {
+    color: #764ba2;
+}
+
+.message-time {
+    margin-left: 10px;
+}
+
+.message-text {
+    background: white;
+    padding: 10px 15px;
+    border-radius: 10px;
+    display: inline-block;
+    max-width: 70%;
+    word-wrap: break-word;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.message.own .message-text {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-bottom-right-radius: 3px;
+}
+
+.message:not(.own) .message-text {
+    border-bottom-left-radius: 3px;
+}
+
+.system-message {
+    text-align: center;
+    color: #888;
+    font-style: italic;
+    font-size: 14px;
+    margin: 10px 0;
+}
+
+.typing-indicator {
+    padding: 10px 20px;
+    min-height: 40px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.typing-indicator.active {
+    color: #667eea;
+    font-style: italic;
+    font-size: 14px;
+}
+
+.typing-dots {
+    display: inline-flex;
+    gap: 4px;
+    margin-left: 8px;
+}
+
+.typing-dots span {
+    width: 8px;
+    height: 8px;
+    background-color: #667eea;
+    border-radius: 50%;
+    display: inline-block;
+    animation: typing 1.4s infinite;
+}
+
+.typing-dots span:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.typing-dots span:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+@keyframes typing {
+    0%, 60%, 100% {
+        transform: translateY(0);
+        opacity: 0.7;
+    }
+    30% {
+        transform: translateY(-10px);
+        opacity: 1;
+    }
+}
+
+.input-area {
+    padding: 20px;
+    background: white;
+    border-top: 1px solid #ddd;
+}
+
+.input-container {
+    display: flex;
+    gap: 10px;
+}
+
+#message-input {
+    flex: 1;
+    padding: 15px;
+    border: 2px solid #ddd;
+    border-radius: 10px;
+    font-size: 16px;
+    outline: none;
+    transition: border-color 0.3s;
+}
+
+#message-input:focus {
+    border-color: #667eea;
+}
+
+#send-button {
+    padding: 15px 30px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+#send-button:hover {
+    transform: scale(1.05);
+}
+
+#send-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.clear-warning {
+    background: #fff3cd;
+    color: #856404;
+    padding: 10px;
+    text-align: center;
+    font-size: 13px;
+    border-bottom: 1px solid #ffeaa7;
+    font-weight: 500;
+}
+
+/* Responsivo para telefone */
+@media (max-width: 768px) {
+    body {
+        padding: 0;
+        height: 100dvh; /* Dynamic viewport height para mobile */
+    }
+
+    .container {
+        width: 100%;
+        height: 100dvh; /* Dynamic viewport height */
+        border-radius: 0;
+        max-width: none;
+        position: relative;
+    }
+
+    .header h1 {
+        font-size: 20px;
+    }
+
+    .status {
+        font-size: 12px;
+    }
+
+    #login-screen {
+        padding: 20px;
+    }
+
+    #login-screen h2 {
+        font-size: 24px;
+        margin-bottom: 20px;
+    }
+
+    #username-input,
+    #join-button {
+        max-width: 100%;
+    }
+
+    #messages {
+        padding: 15px;
+        padding-bottom: 10px; /* Reduzir padding inferior */
+    }
+
+    .message-text {
+        max-width: 85%;
+        font-size: 14px;
+    }
+
+    .typing-indicator {
+        padding: 5px 15px; /* Reduzir padding */
+        min-height: 15px;
+    }
+
+    .input-area {
+        padding: 12px 15px; /* Reduzir padding vertical */
+        position: sticky;
+        bottom: 0;
+        background: white;
+        z-index: 100;
+    }
+
+    .input-container {
+        flex-direction: row;
+        gap: 8px;
+    }
+
+    #message-input {
+        padding: 12px;
+        font-size: 14px;
+    }
+
+    #send-button {
+        padding: 12px 20px;
+        font-size: 14px;
+        white-space: nowrap;
+    }
+
+    .clear-warning {
+        font-size: 11px;
+        padding: 8px;
+    }
+
+    #chat-screen {
+        flex-direction: column;
+    }
+
+    .sidebar {
+        width: 100%;
+        height: 200px;
+        border-right: none;
+        border-bottom: 1px solid #ddd;
+    }
+
+    .sidebar-header h3 {
+        font-size: 16px;
+    }
+
+    .groups-list {
+        display: flex;
+        flex-direction: row;
+        overflow-x: auto;
+        overflow-y: hidden;
+        padding: 10px;
+        gap: 10px;
+    }
+
+    .group-item {
+        min-width: 200px;
+        margin-bottom: 0;
+    }
+
+    .chat-header {
+        padding: 12px 15px;
+    }
+
+    #current-group-name {
+        font-size: 16px;
+    }
+
+    .user-count {
+        font-size: 12px;
+    }
+}
+
+@media (max-width: 480px) {
+    .header {
+        padding: 15px;
+    }
+
+    .header h1 {
+        font-size: 18px;
+    }
+
+    #messages {
+        padding: 10px;
+        padding-bottom: 5px;
+    }
+
+    .message {
+        margin-bottom: 10px;
+    }
+
+    .message-text {
+        max-width: 90%;
+        padding: 8px 12px;
+        font-size: 13px;
+    }
+
+    .typing-indicator {
+        padding: 3px 10px;
+        min-height: 12px;
+        font-size: 12px;
+    }
+
+    .input-area {
+        padding: 10px;
+        position: sticky;
+        bottom: 0;
+        background: white;
+        z-index: 100;
+    }
+
+    #message-input {
+        padding: 10px;
+        font-size: 13px;
+    }
+
+    #send-button {
+        padding: 10px 15px;
+        font-size: 13px;
+    }
+}

@@ -1,0 +1,109 @@
+
+/* Notificação flutuante (Toast) */
+.toast-notification {
+    position: fixed;
+    top: 80px;
+    right: 20px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 15px 25px;
+    border-radius: 10px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 14px;
+    font-weight: 500;
+    z-index: 9999;
+    animation: slideInRight 0.3s ease-out, slideOutRight 0.3s ease-in 3.2s forwards;
+    max-width: 350px;
+}
+
+.toast-notification::before {
+    content: '💬';
+    font-size: 24px;
+}
+
+.toast-content {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.toast-username {
+    font-weight: bold;
+    font-size: 15px;
+}
+
+.toast-message {
+    opacity: 0.95;
+    font-size: 13px;
+    max-width: 250px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(400px);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideOutRight {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(400px);
+        opacity: 0;
+    }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+    .toast-notification {
+        top: 70px;
+        right: 10px;
+        left: 10px;
+        max-width: none;
+        padding: 12px 20px;
+    }
+    
+    .toast-message {
+        max-width: none;
+    }
+}
+
+/* Badge de notificação no header */
+.notification-badge {
+    display: inline-block;
+    background: #ff4444;
+    color: white;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    font-size: 12px;
+    line-height: 20px;
+    text-align: center;
+    margin-left: 10px;
+    font-weight: bold;
+    animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.2);
+        opacity: 0.8;
+    }
+}

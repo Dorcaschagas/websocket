@@ -27,11 +27,20 @@ const wss = new WebSocket.Server({ server });
 // Instanciar o controller
 const chatController = new ChatController();
 
-// Broadcast para todos os clientes conectados
-function broadcast(data, excludeWs = null) {
+// Broadcast para clientes de um grupo específico ou todos
+function broadcast(data, excludeWs = null, groupId = null) {
   wss.clients.forEach(client => {
     if (client !== excludeWs && client.readyState === WebSocket.OPEN) {
-      client.send(JSON.stringify(data));
+      // Se groupId especificado, enviar apenas para membros do grupo
+      if (groupId) {
+        const userData = chatController.getUserData(client);
+        if (userData && userData.groupId === groupId) {
+          client.send(JSON.stringify(data));
+        }
+      } else {
+        // Enviar para todos
+        client.send(JSON.stringify(data));
+      }
     }
   });
 }

@@ -1,5 +1,7 @@
 let ws = null;
 let username = '';
+let currentGroupId = 'geral';
+let groups = [];
 let typingTimeout = null;
 let reconnectAttempts = 0;
 const MAX_RECONNECT_ATTEMPTS = 5;
@@ -14,6 +16,10 @@ const messageInput = document.getElementById('message-input');
 const sendButton = document.getElementById('send-button');
 const statusDiv = document.getElementById('status');
 const typingIndicator = document.getElementById('typing-indicator');
+const groupsList = document.getElementById('groups-list');
+const searchInput = document.getElementById('search-input');
+const currentGroupName = document.getElementById('current-group-name');
+const currentGroupUsers = document.getElementById('current-group-users');
 
 // Conectar ao WebSocket
 function connect() {
@@ -26,12 +32,13 @@ function connect() {
     ws.onopen = () => {
         console.log('Conectado ao servidor WebSocket');
         statusDiv.textContent = `Conectado - ${username}`;
-        reconnectAttempts = 0; // Resetar contador ao conectar com sucesso
+        reconnectAttempts = 0;
 
         // Enviar mensagem de entrada
         ws.send(JSON.stringify({
             type: 'join',
-            username: username
+            username: username,
+            groupId: currentGroupId
         }));
     };
 
@@ -50,7 +57,6 @@ function connect() {
         console.log('Desconectado do servidor');
         statusDiv.textContent = 'Desconectado';
         
-        // Tentar reconectar automaticamente
         if (reconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
             reconnectAttempts++;
             statusDiv.textContent = `Reconectando (${reconnectAttempts}/${MAX_RECONNECT_ATTEMPTS})...`;
@@ -68,21 +74,39 @@ function connect() {
 // Processar mensagens recebidas
 function handleMessage(data) {
     switch (data.type) {
+        case 'groupList':
+            groups = data.groups;
+            renderGroups();
+            break;
+
         case 'history':
-            data.messages.forEach(msg => addMessage(msg));
-            scrollToBottom(true); // Forçar scroll ao carregar histórico
+            if (data.groupId === currentGroupId) {
+                messagesDiv.innerHTML = '';
+                data.messages.forEach(msg => addMessage(msg, true));
+                scrollToBottom(true);
+            }
             break;
 
         case 'message':
-            addMessage(data.message);
+            if (!data.groupId || data.groupId === currentGroupId) {
+                addMessage(data.message, false);
+            } else {
+                console.log('Mensagem ignorada - grupo diferente:', data.groupId, 'atual:', currentGroupId);
+            }
             break;
 
         case 'userJoined':
-            addSystemMessage(`${data.user.username} entrou no chat (${data.userCount} online)`);
+            if (data.groupId === currentGroupId) {
+                addSystemMessage(`${data.user.username} entrou no chat (${data.userCount} online)`);
+                updateCurrentGroupUsers(data.userCount);
+            }
             break;
 
         case 'userLeft':
-            addSystemMessage(`${data.username} saiu do chat (${data.userCount} online)`);
+            if (data.groupId === currentGroupId) {
+                addSystemMessage(`${data.username} saiu do chat (${data.userCount} online)`);
+                updateCurrentGroupUsers(data.userCount);
+            }
             break;
 
         case 'typing':
@@ -92,15 +116,77 @@ function handleMessage(data) {
         case 'messagesCleared':
             clearOldMessagesFromScreen(data.remainingTimestamps);
             break;
+
+        case 'groupSwitched':
+            // LIMPAR MENSAGENS ANTIGAS ANTES DE TROCAR
+            messagesDiv.innerHTML = '';
+            typingIndicator.innerHTML = '';
+            
+            currentGroupId = data.groupId;
+            updateCurrentGroupHeader(data.group);
+            renderGroups();
+            
+            console.log('Grupo trocado para:', data.groupId);
+            break;
     }
 }
+// Renderizar lista de grupos
+function renderGroups() {
+    const searchTerm = searchInput.value.toLowerCase();
+    
+    groupsList.innerHTML = '';
+    
+    groups
+        .filter(group => 
+            group.name.toLowerCase().includes(searchTerm) ||
+            group.description.toLowerCase().includes(searchTerm)
+        )
+        .forEach(group => {
+            const groupItem = document.createElement('div');
+            groupItem.className = `group-item ${group.id === currentGroupId ? 'active' : ''}`;
+            groupItem.onclick = () => switchGroup(group.id);
+            
+            groupItem.innerHTML = `
+                <div class="group-item-header">
+                    <span class="group-name">${escapeHtml(group.name)}</span>
+                    <span class="group-user-count">${group.userCount}</span>
+                </div>
+                <div class="group-description">${escapeHtml(group.description)}</div>
+            `;
+            
+            groupsList.appendChild(groupItem);
+        });
+}
+
+// Trocar de grupo
+function switchGroup(groupId) {
+    if (groupId === currentGroupId) return;
+    
+    console.log('Trocando para grupo:', groupId);
+    
+    ws.send(JSON.stringify({
+        type: 'switchGroup',
+        groupId: groupId
+    }));
+}
+
+// Atualizar header do grupo atual
+function updateCurrentGroupHeader(group) {
+    currentGroupName.textContent = group.name;
+    currentGroupUsers.textContent = `${group.userCount} online`;
+}
+
+// Atualizar contador de usuários
+function updateCurrentGroupUsers(count) {
+    currentGroupUsers.textContent = `${count} online`;
+}
+
 
 // Adicionar mensagem ao chat
-function addMessage(message) {
+function addMessage(message, isHistory = false) {
     const messageDiv = document.createElement('div');
     messageDiv.className = 'message';
 
-    // Adicionar classe 'own' se a mensagem for do usuário atual
     const isOwnMessage = message.username === username;
     if (isOwnMessage) {
         messageDiv.classList.add('own');
@@ -122,8 +208,10 @@ function addMessage(message) {
     messagesDiv.appendChild(messageDiv);
     scrollToBottom();
     
-    // Notificar nova mensagem (passar o objeto message completo)
-    notifyNewMessage(isOwnMessage, message);
+    // Notificar nova mensagem (não notificar se for histórico)
+    if (!isHistory) {
+        notifyNewMessage(isOwnMessage, message);
+    }
 }
 
 // Adicionar mensagem do sistema
@@ -135,9 +223,8 @@ function addSystemMessage(text) {
     scrollToBottom();
 }
 
-// Scroll para o final (sempre mostra a última mensagem)
+// Scroll para o final
 function scrollToBottom(force = false) {
-    // Usar requestAnimationFrame para garantir que o DOM foi atualizado
     requestAnimationFrame(() => {
         messagesDiv.scrollTop = messagesDiv.scrollHeight;
     });
@@ -161,7 +248,7 @@ function showTyping(username, isTyping) {
     }
 }
 
-// Limpar mensagens antigas da tela
+// Limpar mensagens antigas
 function clearOldMessagesFromScreen(remainingTimestamps) {
     const messageElements = messagesDiv.querySelectorAll('.message');
     const remainingSet = new Set(remainingTimestamps);
@@ -170,7 +257,6 @@ function clearOldMessagesFromScreen(remainingTimestamps) {
         const timestampEl = messageEl.querySelector('.message-time');
         if (timestampEl) {
             const timeText = timestampEl.textContent;
-            // Verificar se a mensagem ainda está na lista de mensagens restantes
             let shouldKeep = false;
             
             for (const timestamp of remainingTimestamps) {
@@ -204,10 +290,8 @@ function sendMessage() {
         }));
 
         messageInput.value = '';
-
         messageInput.focus();
 
-        // Notificar que parou de digitar
         ws.send(JSON.stringify({
             type: 'typing',
             isTyping: false
@@ -215,14 +299,14 @@ function sendMessage() {
     }
 }
 
-// Escape HTML para prevenir XSS
+// Escape HTML
 function escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
 }
 
-// Carregar username do localStorage ao iniciar
+// Event Listeners
 window.addEventListener('DOMContentLoaded', () => {
     const savedUsername = localStorage.getItem('chatUsername');
     if (savedUsername) {
@@ -230,18 +314,14 @@ window.addEventListener('DOMContentLoaded', () => {
         usernameInput.focus();
     }
     
-    // Inicializar som de notificação
     notificationSound = createNotificationSound();
 });
 
-// Event Listeners
 joinButton.addEventListener('click', () => {
     username = usernameInput.value.trim();
 
     if (username) {
-        // Salvar username no localStorage
         localStorage.setItem('chatUsername', username);
-
         loginScreen.style.display = 'none';
         chatScreen.style.display = 'flex';
         connect();
@@ -251,7 +331,7 @@ joinButton.addEventListener('click', () => {
 });
 
 usernameInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') {
+    if (e.key === 'Enter') { 
         joinButton.click();
     }
 });
@@ -266,53 +346,52 @@ messageInput.addEventListener('keypress', (e) => {
 
 messageInput.addEventListener('input', () => {
     if (ws && ws.readyState === WebSocket.OPEN) {
-        // Notificar que está digitando
         ws.send(JSON.stringify({
             type: 'typing',
             isTyping: true
         }));
 
-        // Limpar timeout anterior
         clearTimeout(typingTimeout);
 
-        // Notificar que parou de digitar após 1 segundos
         typingTimeout = setTimeout(() => {
             ws.send(JSON.stringify({
                 type: 'typing',
                 isTyping: false
             }));
-        }, 1000);
+        }, 2000);
     }
 });
 
-// Reconectar quando a página voltar a ficar ativa
+// Buscar grupos
+searchInput.addEventListener('input', () => {
+    renderGroups();
+});
+
+// Reconexão
 document.addEventListener('visibilitychange', () => {
     if (!document.hidden && username) {
         clearNotifications();
-        // Página voltou a ficar visível
         if (!ws || ws.readyState === WebSocket.CLOSED || ws.readyState === WebSocket.CLOSING) {
             console.log('Tela reativada - reconectando...');
             statusDiv.textContent = 'Reconectando...';
-            reconnectAttempts = 0; // Resetar tentativas
+            reconnectAttempts = 0;
             connect();
         }
     }
 });
 
-// Reconectar quando a janela receber foco
 window.addEventListener('focus', () => {
     clearNotifications();
     if (username) {
         if (!ws || ws.readyState === WebSocket.CLOSED || ws.readyState === WebSocket.CLOSING) {
             console.log('Janela focada - reconectando...');
             statusDiv.textContent = 'Reconectando...';
-            reconnectAttempts = 0; // Resetar tentativas
+            reconnectAttempts = 0;
             connect();
         }
     }
 });
 
-// Fechar conexão ao sair da página
 window.addEventListener('beforeunload', () => {
     if (ws) {
         ws.close();

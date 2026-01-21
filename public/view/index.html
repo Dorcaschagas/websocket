@@ -4,7 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src 'self' ws: wss:;">
-    <title>Chat WebSocket - MVC</title>
+    <title>Chat WebSocket - Grupos</title>
+    <link rel="stylesheet" href="/view/css/group.css">
+    <link rel="stylesheet" href="/view/css/messages.css">
+    <link rel="stylesheet" href="/view/css/toast_notification.css">
     <link rel="stylesheet" href="/view/css/style.css">
 </head>
 <body>
@@ -26,18 +29,41 @@
         </div>
 
         <div id="chat-screen">
-            <div class="clear-warning">⚠️ As mensagens são limpas automaticamente a cada 1 minuto</div>
-            <div id="messages"></div>
-            <div class="typing-indicator" id="typing-indicator"></div>
-            <div class="input-area">
-                <div class="input-container">
+            <div class="sidebar">
+                <div class="sidebar-header">
+                    <h3>Grupos</h3>
                     <input 
                         type="text" 
-                        id="message-input" 
-                        placeholder="Digite sua mensagem..."
-                        maxlength="500"
+                        id="search-input" 
+                        placeholder="🔍 Buscar grupo ou mensagem..."
+                        class="search-input"
                     >
-                    <button id="send-button">Enviar</button>
+                </div>
+                <div id="groups-list" class="groups-list"></div>
+            </div>
+
+            <div class="chat-content">
+                <div class="chat-header">
+                    <div class="current-group-info">
+                        <span id="current-group-name">💬 Geral</span>
+                        <span id="current-group-users" class="user-count">0 online</span>
+                    </div>
+                </div>
+                
+                <div class="clear-warning">⚠️ As mensagens são limpas automaticamente a cada 1 minuto</div>
+                <div id="messages"></div>
+                <div class="typing-indicator" id="typing-indicator"></div>
+                
+                <div class="input-area">
+                    <div class="input-container">
+                        <input 
+                            type="text" 
+                            id="message-input" 
+                            placeholder="Digite sua mensagem..."
+                            maxlength="500"
+                        >
+                        <button id="send-button">Enviar</button>
+                    </div>
                 </div>
             </div>
         </div>
