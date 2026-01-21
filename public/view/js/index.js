@@ -80,11 +80,11 @@ function handleMessage(data) {
             break;
 
         case 'history':
-            if (data.groupId === currentGroupId) {
-                messagesDiv.innerHTML = '';
-                data.messages.forEach(msg => addMessage(msg, true));
-                scrollToBottom(true);
-            }
+            // Sempre limpar antes de carregar histórico
+            messagesDiv.innerHTML = '';
+            data.messages.forEach(msg => addMessage(msg, true));
+            scrollToBottom(true);
+            console.log(`Histórico carregado: ${data.messages.length} mensagens do grupo ${data.groupId}`);
             break;
 
         case 'message':
@@ -118,15 +118,15 @@ function handleMessage(data) {
             break;
 
         case 'groupSwitched':
-            // LIMPAR MENSAGENS ANTIGAS ANTES DE TROCAR
-            messagesDiv.innerHTML = '';
-            typingIndicator.innerHTML = '';
-            
+            // Atualizar o grupo atual e UI
             currentGroupId = data.groupId;
             updateCurrentGroupHeader(data.group);
             renderGroups();
             
-            console.log('Grupo trocado para:', data.groupId);
+            // Limpar indicador de digitação
+            typingIndicator.innerHTML = '';
+            
+            console.log('Grupo trocado para:', data.groupId, '- Aguardando histórico...');
             break;
     }
 }
