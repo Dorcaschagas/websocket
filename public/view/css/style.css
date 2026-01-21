@@ -95,6 +95,14 @@ body {
     display: none;
     flex: 1;
     flex-direction: column;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scroll-behavior: smooth;
+}
+
+#chat-screen::-webkit-scrollbar, #messages::-webkit-scrollbar {
+    width: 1px;
+    color: transparent;
 }
 
 #messages {
@@ -104,6 +112,8 @@ body {
     padding: 20px;
     background: #f5f5f5;
     scroll-behavior: smooth;
+    display: flex;
+    flex-direction: column;
 }
 
 .message {
@@ -244,6 +254,9 @@ body {
     font-size: 13px;
     border-bottom: 1px solid #ffeaa7;
     font-weight: 500;
+    position: sticky;
+    top: 0;
+    z-index: 10;
 }
 
 /* Responsivo para telefone */

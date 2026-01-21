@@ -131,17 +131,12 @@ function addSystemMessage(text) {
     scrollToBottom();
 }
 
-// Scroll inteligente para o final
+// Scroll para o final (sempre mostra a última mensagem)
 function scrollToBottom(force = false) {
-    // Verificar se o usuário está perto do final (dentro de 100px)
-    const isNearBottom = messagesDiv.scrollHeight - messagesDiv.scrollTop - messagesDiv.clientHeight < 100;
-    
-    // Rolar apenas se estiver perto do final ou se for forçado
-    if (isNearBottom || force) {
-        setTimeout(() => {
-            messagesDiv.scrollTop = messagesDiv.scrollHeight;
-        }, 0);
-    }
+    // Usar requestAnimationFrame para garantir que o DOM foi atualizado
+    requestAnimationFrame(() => {
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    });
 }
 
 // Mostrar indicador de digitação
@@ -196,6 +191,8 @@ function sendMessage() {
         }));
 
         messageInput.value = '';
+
+        messageInput.focus();
 
         // Notificar que parou de digitar
         ws.send(JSON.stringify({
