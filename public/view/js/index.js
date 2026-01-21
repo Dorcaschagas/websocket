@@ -15,7 +15,8 @@ const typingIndicator = document.getElementById('typing-indicator');
 // Conectar ao WebSocket
 function connect() {
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const wsUrl = `${protocol}//${window.location.host}`;
+    const wsUrl = `${protocol}//${window.location.host}:${3015}`;
+    console.log('Conectando ao WebSocket em', wsUrl);
 
     ws = new WebSocket(wsUrl);
 
@@ -32,6 +33,7 @@ function connect() {
 
     ws.onmessage = (event) => {
         const data = JSON.parse(event.data);
+        console.log('Mensagem recebida:', data);
         handleMessage(data);
     };
 
@@ -87,12 +89,12 @@ function addMessage(message) {
     });
 
     messageDiv.innerHTML = `
-                <div class="message-info">
-                    <span class="message-username">${escapeHtml(message.username)}</span>
-                    <span class="message-time">${time}</span>
-                </div>
-                <div class="message-text">${escapeHtml(message.text)}</div>
-            `;
+        <div class="message-info">
+            <span class="message-username">${escapeHtml(message.username)}</span>
+            <span class="message-time">${time}</span>
+        </div>
+        <div class="message-text">${escapeHtml(message.text)}</div>
+    `;
 
     messagesDiv.appendChild(messageDiv);
     messagesDiv.scrollTop = messagesDiv.scrollHeight;

@@ -7,6 +7,7 @@ function setupWebSocket(wss, chatController, broadcast, server) {
     ws.on('message', (data) => {
       try {
         const messageData = JSON.parse(data);
+        console.log(messageData)
 
         switch (messageData.type) {
           case 'join':
