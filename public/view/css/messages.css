@@ -207,68 +207,43 @@
     font-weight: 500;
 }
 
-/* Responsivo para telefone */
+/* Responsivo Mobile - Messages */
 @media (max-width: 768px) {
-    body {
-        padding: 0;
-        height: 100dvh; /* Dynamic viewport height para mobile */
-    }
-
-    .container {
-        width: 100%;
-        height: 100dvh; /* Dynamic viewport height */
-        border-radius: 0;
-        max-width: none;
-        position: relative;
-    }
-
-    .header h1 {
-        font-size: 20px;
-    }
-
-    .status {
-        font-size: 12px;
-    }
-
-    #login-screen {
-        padding: 20px;
-    }
-
-    #login-screen h2 {
-        font-size: 24px;
-        margin-bottom: 20px;
-    }
-
-    #username-input,
-    #join-button {
-        max-width: 100%;
-    }
-
     #messages {
-        padding: 15px;
-        padding-bottom: 10px; /* Reduzir padding inferior */
+        padding: 12px;
+        padding-bottom: 8px;
+    }
+
+    .message {
+        margin-bottom: 12px;
+    }
+
+    .message-info {
+        font-size: 11px;
     }
 
     .message-text {
-        max-width: 85%;
+        max-width: 80%;
         font-size: 14px;
+        padding: 9px 13px;
     }
 
     .typing-indicator {
-        padding: 5px 15px; /* Reduzir padding */
-        min-height: 15px;
+        padding: 6px 12px;
+        min-height: 30px;
+        font-size: 13px;
+    }
+
+    .typing-dots span {
+        width: 6px;
+        height: 6px;
     }
 
     .input-area {
-        padding: 12px 15px; /* Reduzir padding vertical */
-        position: sticky;
-        bottom: 0;
-        background: white;
-        z-index: 100;
+        padding: 10px 12px;
     }
 
     .input-container {
-        flex-direction: row;
         gap: 8px;
     }
 
@@ -278,70 +253,14 @@
     }
 
     #send-button {
-        padding: 12px 20px;
+        padding: 12px 18px;
         font-size: 14px;
-        white-space: nowrap;
-    }
-
-    .clear-warning {
-        font-size: 11px;
-        padding: 8px;
-    }
-
-    #chat-screen {
-        flex-direction: column;
-    }
-
-    .sidebar {
-        width: 100%;
-        height: 200px;
-        border-right: none;
-        border-bottom: 1px solid #ddd;
-    }
-
-    .sidebar-header h3 {
-        font-size: 16px;
-    }
-
-    .groups-list {
-        display: flex;
-        flex-direction: row;
-        overflow-x: auto;
-        overflow-y: hidden;
-        padding: 10px;
-        gap: 10px;
-    }
-
-    .group-item {
-        min-width: 200px;
-        margin-bottom: 0;
-    }
-
-    .chat-header {
-        padding: 12px 15px;
-    }
-
-    #current-group-name {
-        font-size: 16px;
-    }
-
-    .user-count {
-        font-size: 12px;
     }
 }
 
 @media (max-width: 480px) {
-    .header {
-        padding: 15px;
-    }
-
-    .header h1 {
-        font-size: 18px;
-    }
-
     #messages {
         padding: 10px;
-        padding-bottom: 5px;
     }
 
     .message {
@@ -349,23 +268,19 @@
     }
 
     .message-text {
-        max-width: 90%;
-        padding: 8px 12px;
+        max-width: 85%;
         font-size: 13px;
+        padding: 8px 12px;
     }
 
     .typing-indicator {
-        padding: 3px 10px;
-        min-height: 12px;
+        padding: 4px 10px;
+        min-height: 25px;
         font-size: 12px;
     }
 
     .input-area {
-        padding: 10px;
-        position: sticky;
-        bottom: 0;
-        background: white;
-        z-index: 100;
+        padding: 8px 10px;
     }
 
     #message-input {
