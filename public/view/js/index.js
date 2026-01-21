@@ -1,6 +1,9 @@
 let ws = null;
 let username = '';
 let typingTimeout = null;
+let reconnectAttempts = 0;
+const MAX_RECONNECT_ATTEMPTS = 5;
+const RECONNECT_DELAY = 3000;
 
 const loginScreen = document.getElementById('login-screen');
 const chatScreen = document.getElementById('chat-screen');
@@ -23,6 +26,7 @@ function connect() {
     ws.onopen = () => {
         console.log('Conectado ao servidor WebSocket');
         statusDiv.textContent = `Conectado - ${username}`;
+        reconnectAttempts = 0; // Resetar contador ao conectar com sucesso
 
         // Enviar mensagem de entrada
         ws.send(JSON.stringify({
@@ -45,6 +49,19 @@ function connect() {
     ws.onclose = () => {
         console.log('Desconectado do servidor');
         statusDiv.textContent = 'Desconectado';
+        
+        // Tentar reconectar automaticamente
+        if (reconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
+            reconnectAttempts++;
+            statusDiv.textContent = `Reconectando (${reconnectAttempts}/${MAX_RECONNECT_ATTEMPTS})...`;
+            console.log(`Tentativa de reconexão ${reconnectAttempts}...`);
+            
+            setTimeout(() => {
+                connect();
+            }, RECONNECT_DELAY);
+        } else {
+            statusDiv.textContent = 'Falha na conexão. Recarregue a página.';
+        }
     };
 }
 
@@ -69,6 +86,10 @@ function handleMessage(data) {
 
         case 'typing':
             showTyping(data.username, data.isTyping);
+            break;
+
+        case 'messagesCleared':
+            clearOldMessagesFromScreen(data.remainingTimestamps);
             break;
     }
 }
@@ -116,6 +137,38 @@ function showTyping(username, isTyping) {
     } else {
         typingIndicator.textContent = '';
     }
+}
+
+// Limpar mensagens antigas da tela
+function clearOldMessagesFromScreen(remainingTimestamps) {
+    const messageElements = messagesDiv.querySelectorAll('.message');
+    const remainingSet = new Set(remainingTimestamps);
+    
+    messageElements.forEach(messageEl => {
+        const timestampEl = messageEl.querySelector('.message-time');
+        if (timestampEl) {
+            const timeText = timestampEl.textContent;
+            // Verificar se a mensagem ainda está na lista de mensagens restantes
+            let shouldKeep = false;
+            
+            for (const timestamp of remainingTimestamps) {
+                const date = new Date(timestamp);
+                const formattedTime = date.toLocaleTimeString('pt-BR', {
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+                
+                if (formattedTime === timeText) {
+                    shouldKeep = true;
+                    break;
+                }
+            }
+            
+            if (!shouldKeep) {
+                messageEl.remove();
+            }
+        }
+    });
 }
 
 // Enviar mensagem

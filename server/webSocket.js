@@ -3,8 +3,16 @@ function setupWebSocket(wss, chatController, broadcast, server) {
   // Gerenciar conexões WebSocket
   wss.on('connection', (ws) => {
     console.log('Novo cliente conectado');
-    setInterval(() => {
-      chatController.clearOldMessages();
+    
+    const clearMessagesInterval = setInterval(() => {
+      const result = chatController.clearOldMessages();
+      if (result.cleared) {
+        // Notificar todos os clientes sobre a limpeza
+        broadcast({
+          type: 'messagesCleared',
+          remainingTimestamps: result.remainingTimestamps
+        });
+      }
     }, 60000);
 
     ws.on('message', (data) => {
@@ -70,6 +78,7 @@ function setupWebSocket(wss, chatController, broadcast, server) {
     });
 
     ws.on('close', () => {
+      clearInterval(clearMessagesInterval);
       const user = chatController.removeUser(ws);
       if (user) {
         console.log(`Cliente desconectado: ${user.username}`);

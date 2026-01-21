@@ -63,7 +63,14 @@ class ChatController {
     const clearedCount = initialLength - this.messages.length;
     if (clearedCount > 0) {
       console.log(`${clearedCount} mensagens antigas foram removidas`);
+      return {
+        cleared: true,
+        clearedCount,
+        remainingTimestamps: this.messages.map(m => m.timestamp.toISOString())
+      };
     }
+    
+    return { cleared: false };
   }
 }
 

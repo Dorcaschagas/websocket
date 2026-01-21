@@ -248,13 +248,15 @@ body {
 @media (max-width: 768px) {
     body {
         padding: 0;
+        height: 100dvh; /* Dynamic viewport height para mobile */
     }
 
     .container {
         width: 100%;
-        height: 100vh;
+        height: 100dvh; /* Dynamic viewport height */
         border-radius: 0;
         max-width: none;
+        position: relative;
     }
 
     .header h1 {
@@ -281,6 +283,7 @@ body {
 
     #messages {
         padding: 15px;
+        padding-bottom: 10px; /* Reduzir padding inferior */
     }
 
     .message-text {
@@ -288,8 +291,17 @@ body {
         font-size: 14px;
     }
 
+    .typing-indicator {
+        padding: 5px 15px; /* Reduzir padding */
+        min-height: 15px;
+    }
+
     .input-area {
-        padding: 15px;
+        padding: 12px 15px; /* Reduzir padding vertical */
+        position: sticky;
+        bottom: 0;
+        background: white;
+        z-index: 100;
     }
 
     .input-container {
@@ -325,6 +337,7 @@ body {
 
     #messages {
         padding: 10px;
+        padding-bottom: 5px;
     }
 
     .message {
@@ -337,8 +350,18 @@ body {
         font-size: 13px;
     }
 
+    .typing-indicator {
+        padding: 3px 10px;
+        min-height: 12px;
+        font-size: 12px;
+    }
+
     .input-area {
         padding: 10px;
+        position: sticky;
+        bottom: 0;
+        background: white;
+        z-index: 100;
     }
 
     #message-input {
