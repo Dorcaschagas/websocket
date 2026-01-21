@@ -101,7 +101,8 @@ function addMessage(message) {
     messageDiv.className = 'message';
 
     // Adicionar classe 'own' se a mensagem for do usuário atual
-    if (message.username === username) {
+    const isOwnMessage = message.username === username;
+    if (isOwnMessage) {
         messageDiv.classList.add('own');
     }
 
@@ -120,6 +121,9 @@ function addMessage(message) {
 
     messagesDiv.appendChild(messageDiv);
     scrollToBottom();
+    
+    // Notificar nova mensagem (passar o objeto message completo)
+    notifyNewMessage(isOwnMessage, message);
 }
 
 // Adicionar mensagem do sistema
@@ -225,6 +229,9 @@ window.addEventListener('DOMContentLoaded', () => {
         usernameInput.value = savedUsername;
         usernameInput.focus();
     }
+    
+    // Inicializar som de notificação
+    notificationSound = createNotificationSound();
 });
 
 // Event Listeners
@@ -268,24 +275,20 @@ messageInput.addEventListener('input', () => {
         // Limpar timeout anterior
         clearTimeout(typingTimeout);
 
-        // Notificar que parou de digitar após 2 segundos
+        // Notificar que parou de digitar após 1 segundos
         typingTimeout = setTimeout(() => {
             ws.send(JSON.stringify({
                 type: 'typing',
                 isTyping: false
             }));
-        }, 2000);
+        }, 1000);
     }
 });
-
-// Limpar username do localStorage (opcional - descomente se quiser)
-// function clearUsername() {
-//     localStorage.removeItem('chatUsername');
-// }
 
 // Reconectar quando a página voltar a ficar ativa
 document.addEventListener('visibilitychange', () => {
     if (!document.hidden && username) {
+        clearNotifications();
         // Página voltou a ficar visível
         if (!ws || ws.readyState === WebSocket.CLOSED || ws.readyState === WebSocket.CLOSING) {
             console.log('Tela reativada - reconectando...');
@@ -298,6 +301,7 @@ document.addEventListener('visibilitychange', () => {
 
 // Reconectar quando a janela receber foco
 window.addEventListener('focus', () => {
+    clearNotifications();
     if (username) {
         if (!ws || ws.readyState === WebSocket.CLOSED || ws.readyState === WebSocket.CLOSING) {
             console.log('Janela focada - reconectando...');
